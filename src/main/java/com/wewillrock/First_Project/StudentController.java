@@ -11,18 +11,15 @@ import java.util.HashMap;
 //@RequestMapping("students")
 public class StudentController {
 
-
-    // Datatype
-    HashMap<Integer , Student>   studentDb = new HashMap<>();
+    @Autowired  // Automatically take care studentService  and obj has been created
+    StudentService studentService;
 
     // Add a Student
   @PostMapping( "/add_student")
-    public  String addStudent(@RequestBody() Student student){
-      //Add it to our DB
-      int key = student.id;
+    public  ResponseEntity<String> addStudent(@RequestBody() Student student){
 
-      studentDb.put(key , student);
-      return "Student added successfully";
+        String response = studentService.addStudent(student);
+        return  new ResponseEntity<>(response,HttpStatus.CREATED);
   }
 
 //    http://localhost:8076/add_student
@@ -35,18 +32,46 @@ public class StudentController {
 
 
 // get student by id
-  @GetMapping("get_student_by_id")
-    public  Student getStudentById(@RequestParam("id") Integer id){
+/
 
-      return studentDb.get(id);
-  }
+  // option 1:
+//        /  @GetMapping("get_student_by_id")
+//    public  Student getStudentById(@RequestParam("id") Integer id){
+//
+//      return studentDb.get(id);
+//  }
+  @GetMapping("get_student_by_id")
+    public ResponseEntity<Student> getStudentById(@RequestParam("id") Integer id){
+      Student  resultStudent  = studentService.getStudentById(id);
+      if( resultStudent == null){
+          return  new ResponseEntity<>(resultStudent , HttpStatus.NOT_FOUND);
+      }
+      else{
+          return  new ResponseEntity<>(resultStudent , HttpStatus.FOUND);
+      }
+    }
 //    http://localhost:8076/get_student_by_id?id=1
 
-  // get by path
+
+  // GET STUDENT BY PATH
+
+    // option 1:
+//    @GetMapping("get_by_path/{id}")
+//    public Student getBypath(@PathVariable("id") Integer id){
+//        Student student = studentDb.get(id);
+//        return student;
+//    }
     @GetMapping("get_by_path/{id}")
-    public Student getBypath(@PathVariable("id") Integer id){
-      Student student = studentDb.get(id);
-      return student;
+    public ResponseEntity<Student> getBypath(@PathVariable("id") Integer id){
+      // calling ther service layer
+        Student  resultStudent  = studentService.getStudentById(id);
+        if( resultStudent == null){
+            return  new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+        else{
+            return  new ResponseEntity<>(resultStudent , HttpStatus.FOUND);
+        }
+
     }
     //  http://localhost:8076/get_by_path/1
 
@@ -54,31 +79,30 @@ public class StudentController {
   // Get student y name
     //1ST
   @GetMapping("get_student_by_name")
-  public  Student getStudentByName(@RequestParam("name") String searchName){
-      for( Student s : studentDb.values()){
-//         if(s.name == searchName){
-//             return s;
-//         }
-          if(s.name.equals(searchName)){
-              return s;
-          }
-      }
-      return null;
-  }
+//  public  Student getStudentByName(@RequestParam("name") String searchName){
+//      for( Student s : studentDb.values()){
+////         if(s.name == searchName){
+////             return s;
+////         }
+//          if(s.name.equals(searchName)){
+//              return s;
+//          }
+//      }
+//      return null;
+//  }
 
 //    http://localhost:8076/get_student_by_name?name=Shiv
 
     //2ND
-//  public  ResponseEntity<Student> getStudentByName(@RequestParam("name") String searchName){
-//      for( Student s : studentDb.values()){
-//
-//          if(s.name.equals(searchName)){
-//              return new ResponseEntity<>(s , HttpStatus.FOUND);
-//          }
-//      }
-//      return new ResponseEntity<>(null , HttpStatus.NOT_FOUND);
-//  }
-
+  public  ResponseEntity<Student> getStudentByName(@RequestParam("name") String searchName){
+      Student  resultStudent  = studentService.getStudentByName(searchName);
+      if( resultStudent == null){
+          return  new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+      }
+      else{
+          return  new ResponseEntity<>(resultStudent , HttpStatus.FOUND);
+      }
+  }
 
 
     // UPDATE A STUDENT
@@ -94,9 +118,13 @@ public class StudentController {
 
     //2nd
     public ResponseEntity<Student> updateStudent(@RequestBody()Student student){
-        int key = student.id;
-        studentDb.put(key , student);
-        return  new ResponseEntity<>(student , HttpStatus.ACCEPTED);
+        Student  resultStudent  = studentService.updateStudent(student);
+        if( resultStudent == null){
+            return  new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+        else{
+            return  new ResponseEntity<>(resultStudent , HttpStatus.FOUND);
+        }
     }
 
 
@@ -114,7 +142,12 @@ public class StudentController {
 
     @DeleteMapping("/delete_student")
     public ResponseEntity<String> deleteStudent(@RequestParam ("id") Integer id){
-      studentDb.remove(id);
-      return new ResponseEntity<>("The student has been removed"  , HttpStatus.OK);
+        String  resultStudent  = studentService.deleteStudent(id);
+        if( resultStudent == null){
+            return  new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+        else{
+            return  new ResponseEntity<>(resultStudent , HttpStatus.FOUND);
+        }
     }
 }
