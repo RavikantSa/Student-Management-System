@@ -7,5 +7,5 @@ Controller
 Service
 Repository
 
-Used Maven  to  Creat Spring Architecture
+Used Maven  to  Creat Spring Architecture &
 Postman to feath APIs from localhost server
